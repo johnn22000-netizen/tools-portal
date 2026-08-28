@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>工具入口網頁 | Tools Portal</title>
-  <!-- Tailwind CSS CDN (快速外觀排版) -->
+  <title>教學與實用工具平台 | Tools Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome 圖示庫 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* 漸層背景與卡片懸浮效果 */
     body {
       background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       min-height: 100vh;
@@ -26,11 +23,11 @@
 <body class="font-sans text-slate-800 flex flex-col min-h-screen">
 
   <!-- 頂部 Header -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-md">
-          <i class="fa-solid font-sharp fa-cubes"></i>
+          <i class="fa-solid fa-cubes"></i>
         </div>
         <div>
           <h1 class="text-xl font-bold text-slate-900 leading-tight">教學與實用工具平台</h1>
@@ -40,33 +37,95 @@
     </div>
   </header>
 
-  <!-- 主內容區塊 -->
+  <!-- 主內容區 -->
   <main class="flex-grow max-w-6xl mx-auto px-6 py-10 w-full">
-    <!-- 標頭簡介 -->
     <div class="mb-10 text-center max-w-2xl mx-auto">
       <h2 class="text-3xl font-extrabold text-slate-900 mb-3">選擇您需要的工具</h2>
       <p class="text-slate-600 leading-relaxed">
-        點選下方工具卡片即可開啟對應專案。部分工具需配合個人 Google 試算表使用。
+        點選下方工具可直接申請專屬連結。系統會將您的 Google Sheet 自動設定為資料庫。
       </p>
     </div>
 
-    <!-- 載入中狀態 -->
+    <!-- 載入中 -->
     <div id="loading" class="flex flex-col items-center justify-center py-20 text-slate-400">
       <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3 text-indigo-500"></i>
       <p class="text-sm font-medium">正在載入工具清單...</p>
     </div>
 
-    <!-- 錯誤狀態 -->
+    <!-- 錯誤訊息 -->
     <div id="error-message" class="hidden max-w-md mx-auto bg-red-50 border border-red-200 rounded-2xl p-6 text-center text-red-600">
       <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
       <p id="error-text" class="text-sm">無法取得工具列表，請稍後再試。</p>
     </div>
 
-    <!-- 工具卡片容器 (動態渲染) -->
+    <!-- 工具卡片容器 -->
     <div id="tool-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </main>
 
-  <!-- 頁尾 Footer -->
+  <!-- 申請 Modal 彈出視窗 -->
+  <div id="apply-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl border border-slate-100 relative">
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <!-- 視窗標頭 -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <i id="modal-tool-icon" class="fa-solid fa-plug"></i>
+        </div>
+        <div>
+          <h3 id="modal-tool-name" class="font-bold text-slate-900">申請工具</h3>
+          <p id="modal-tool-id" class="text-xs text-slate-400 font-mono">tool_id</p>
+        </div>
+      </div>
+
+      <!-- 表單區塊 -->
+      <form id="apply-form" onsubmit="handleApplySubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">您的 Gmail 信箱</label>
+          <input type="email" id="input-email" required placeholder="example@gmail.com"
+                 class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">您的 Google Sheet 分享連結</label>
+          <input type="url" id="input-sheet-url" required placeholder="https://docs.google.com/spreadsheets/d/..."
+                 class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <p class="text-[11px] text-slate-400 mt-1">請確定此 Sheet 已開啟「知道連結的人皆可編輯」權限。</p>
+        </div>
+
+        <button type="submit" id="submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+          <span>產生專屬入口連結</span>
+        </button>
+      </form>
+
+      <!-- 結果區塊 (預設隱藏) -->
+      <div id="result-box" class="hidden space-y-4 pt-2">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
+          <i class="fa-solid fa-circle-check text-2xl text-emerald-600 mb-1"></i>
+          <h4 class="font-bold text-emerald-900 text-sm">專屬連結生成成功！</h4>
+          <p class="text-xs text-emerald-700 mt-0.5">已將紀錄自動寫入 Master Database (ToolUsed)</p>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-slate-700">您的專屬工具連結：</label>
+          <div class="flex gap-2">
+            <input type="text" id="result-url" readonly class="flex-grow px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 font-mono select-all">
+            <button onclick="copyResultUrl()" class="px-3 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-700">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <a id="result-link-btn" href="#" target="_blank" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+          立即開啟工具 <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
   <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
     <p>© Tools Portal. Powered by GitHub Pages & Google Apps Script.</p>
   </footer>
@@ -74,6 +133,9 @@
   <script>
     // ⚠️ 請替換為你在階段二得到的 GAS Web App URL
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzq_tuayTvoxvzJw59NCWo5KFDDN2v2oPtIR6jHKf3E8HqizvupYAHOVMaID3192WcWmg/exec";
+
+    let currentTools = [];
+    let selectedTool = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       loadTools();
@@ -91,25 +153,23 @@
         if (!result.success) throw new Error(result.message || "讀取資料失敗");
 
         loadingEl.classList.add("hidden");
-        
-        if (result.data.length === 0) {
+        currentTools = result.data;
+
+        if (currentTools.length === 0) {
           gridEl.innerHTML = `<p class="col-span-full text-center text-slate-400 py-10">目前沒有可用的工具。</p>`;
           return;
         }
 
-        // 渲染每個工具卡片
-        gridEl.innerHTML = result.data.map(tool => createToolCard(tool)).join('');
+        gridEl.innerHTML = currentTools.map((tool, idx) => createToolCard(tool, idx)).join('');
 
       } catch (err) {
         console.error("載入失敗：", err);
         loadingEl.classList.add("hidden");
-        document.getElementById("error-text").textContent = "讀取資料失敗，請確認 API 網址設定正確。";
         errorEl.classList.remove("hidden");
       }
     }
 
-    function createToolCard(tool) {
-      // 處理 Icon 邏輯 (支援 FontAwesome class 或圖片 URL)
+    function createToolCard(tool, index) {
       let iconHtml = `<i class="fa-solid fa-screwdriver-wrench text-2xl text-indigo-600"></i>`;
       if (tool.icon) {
         if (tool.icon.startsWith("http")) {
@@ -120,12 +180,10 @@
       }
 
       return `
-        <a href="${tool.githubLink}" target="_blank" rel="noopener noreferrer" 
-           class="tool-card group bg-white rounded-2xl p-6 border border-slate-200/80 flex flex-col justify-between shadow-sm hover:border-indigo-200">
+        <div class="tool-card bg-white rounded-2xl p-6 border border-slate-200/80 flex flex-col justify-between shadow-sm hover:border-indigo-200">
           <div>
-            <!-- 上方圖示與 ID -->
             <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
                 ${iconHtml}
               </div>
               <span class="text-xs font-mono font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">
@@ -133,22 +191,81 @@
               </span>
             </div>
 
-            <!-- 工具名稱與介紹 -->
-            <h3 class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">
-              ${tool.toolName}
-            </h3>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">${tool.toolName}</h3>
             <p class="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-6">
               ${tool.description || '暫無簡短介紹。'}
             </p>
           </div>
 
-          <!-- 下方按鈕樣式 -->
-          <div class="flex items-center text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
-            <span>開啟工具</span>
-            <i class="fa-solid fa-arrow-right ml-2"></i>
-          </div>
-        </a>
+          <button onclick="openApplyModal(${index})" class="w-full bg-slate-900 hover:bg-indigo-600 text-white text-xs font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-key"></i>
+            <span>申請/生成專屬連結</span>
+          </button>
+        </div>
       `;
+    }
+
+    function openApplyModal(index) {
+      selectedTool = currentTools[index];
+      document.getElementById("modal-tool-name").textContent = `申請 ${selectedTool.toolName}`;
+      document.getElementById("modal-tool-id").textContent = selectedTool.toolId;
+      
+      // 重置表單狀態
+      document.getElementById("apply-form").classList.remove("hidden");
+      document.getElementById("result-box").classList.add("hidden");
+      document.getElementById("input-email").value = "";
+      document.getElementById("input-sheet-url").value = "";
+      
+      document.getElementById("apply-modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("apply-modal").classList.add("hidden");
+    }
+
+    async function handleApplySubmit(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById("submit-btn");
+      const email = document.getElementById("input-email").value.trim();
+      const sheetUrl = document.getElementById("input-sheet-url").value.trim();
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> 處理中...`;
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "registerUserTool",
+            toolId: selectedTool.toolId,
+            userEmail: email,
+            userSheetLink: sheetUrl
+          })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message || "註冊失敗");
+
+        // 顯示結果
+        document.getElementById("apply-form").classList.add("hidden");
+        document.getElementById("result-box").classList.remove("hidden");
+        document.getElementById("result-url").value = result.data.finalWebLink;
+        document.getElementById("result-link-btn").href = result.data.finalWebLink;
+
+      } catch (err) {
+        alert("申請失敗：" + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>產生專屬入口連結</span>`;
+      }
+    }
+
+    function copyResultUrl() {
+      const input = document.getElementById("result-url");
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert("已成功複製專屬網址到剪貼簿！");
     }
   </script>
 </body>
