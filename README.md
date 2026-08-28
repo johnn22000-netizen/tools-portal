@@ -32,6 +32,6 @@
 ### ⚙️ 後端 API 設定
 本平台集中使用以下 Google Apps Script (GAS) Web App 作為中樞 API：
 ```javascript
-const GAS_API_URL = "[https://script.google.com/macros/s/AKfycbzq_tuayTvoxvzJw59NCWo5KFDDN2v2oPtIR6jHKf3E8HqizvupYAHOVMaID3192WcWmg/exec](https://script.google.com/macros/s/AKfycbzq_tuayTvoxvzJw59NCWo5KFDDN2v2oPtIR6jHKf3E8HqizvupYAHOVMaID3192WcWmg/exec)";
-
+const GAS_API_URL = "[https://script.google.com/macros/s/AKfycbzq_tuayTvoxvzJw59NCWo5KFDDN2v2oPtIR6jHKf3E8HqizvupYAHOVMaID3192WcWmg/exec](https://script.google.com/macros/s/AKfycbzq_tuayTvoxvzJw59NCWo5KFDDN2v2oPtIR6jHKf3E8HqizvupYAHOVMaID3192WcWmg/exec)";'''
+aaa
 
